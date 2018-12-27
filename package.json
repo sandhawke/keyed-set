@@ -1,0 +1,28 @@
+{
+  "name": "keyed-set",
+  "version": "0.0.0",
+  "description": "Like Set() but with equality and emits change events",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx standard && npx tap --cov test*.js test/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sandhawke/keyed-set.git"
+  },
+  "keywords": [
+    "sandhawke"
+  ],
+  "author": "Sandro Hawke (http://hawke.org/sandro)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sandhawke/keyed-set/issues"
+  },
+  "homepage": "https://github.com/sandhawke/keyed-set#readme",
+  "devDependencies": {
+    "tape": "^4.9.1"
+  },
+  "dependencies": {
+    "debug": "^4.1.0"
+  }
+}
