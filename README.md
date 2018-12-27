@@ -1,7 +1,7 @@
-# shareable-set
+# keyed-set
 [![NPM version][npm-image]][npm-url]
 
-Like Set() but with equality via keystring function, and emits changes
+KeyedSet: like Set() but with equality, and emits changes
 
 ## Motivation
 
@@ -56,47 +56,5 @@ s.add({b: 2, id: 1000})
 // this can get a little tricky.
 ```
 
-## API
-
-    s = new ShareableSet(options)
-
-Options can include:
-
-* parse - function to use instead of JSON.parse
-* stringify - function to use instead of JSON.stringify
-* parseAll - for addAll
-* stringifyAll - for pipe
-
-    s.strings.add
-    s.strings.delete
-    s.strings.clear
-    s.strings.on('add', ...)
-    s.strings.on('delete', ...)
-    s.strings.on('clear', ...)
-
-Just like you'd expect, except they operate on serializations.  For
-delete, it's fine to have the serialization just be a key, if that
-makes sense for your data.
-
-    s.strings.etag
-
-Optional.  If present, must be a value which will be different for
-every different state of the dataset (statistically speaking), such as
-a SHA-256.  To make this reasonably efficient, rather than using a
-SHA-256 of the entire dataset, it is suggested to use the XOR of the
-SHA-256 of each dataset element.  That way the etag can be updated
-with each delete without traversing the whole datas.
-
-    s.strings.addAll(document)
-
-Similar to add(), except it takes an serialization of a dataset
-instead of a dataset item.  For example, for JSON, this will include
-surrounding brackets and commas between the items.
-
-    s.strings.pipe(dest)
-
-Serializes the set to writableStream dest.
-
-
-[npm-image]: https://img.shields.io/npm/v/shareable-set.svg?style=flat-square
-[npm-url]: https://npmjs.org/package/shareable-set
+[npm-image]: https://img.shields.io/npm/v/keyed-set.svg?style=flat-square
+[npm-url]: https://npmjs.org/package/keyed-set
