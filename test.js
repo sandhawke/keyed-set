@@ -104,7 +104,7 @@ test('delete by key', t => {
   t.deepEqual([...s], [{ a: 1 }])
 
   // present, removes it
-  s.delete('{"a":1}')
+  s.delete({ a: 1 })
   expect = [
     [ 'add-key', '{"a":1}' ],
     [ 'add-object', { a: 1 } ],
@@ -182,5 +182,41 @@ test('values', t => {
 
   s.clear()
   t.deepEqual([...s], [])
+  t.end()
+})
+
+test('key methods', t => {
+  const s = new KeyedSet()
+  const log = []
+  let expect
+
+  s.on('add-key', i => { log.push(['add-key', i]) })
+  s.on('add-key', i => { log.push(['dup-add-key', i]) })
+  s.on('delete-key', i => { log.push(['delete-key', i]) })
+  s.on('add', i => { log.push(['add-object', i]) })
+  s.on('delete', i => { log.push(['delete-object', i]) })
+  s.on('clear', i => { log.push(['clear-object', i]) })
+
+  t.deepEqual(log, [])
+  const item1 = { a: 1 }
+  s.addKey(JSON.stringify(item1), item1)
+  expect = [
+    [ 'add-key', '{"a":1}' ],
+    [ 'dup-add-key', '{"a":1}' ],
+    [ 'add-object', { a: 1 } ]
+  ]
+  t.deepEqual(log, expect)
+  t.deepEqual([...s], [{ a: 1 }])
+
+  // this does nothing, of course
+  s.addKey(JSON.stringify(item1), item1)
+  t.deepEqual(log, expect)
+  t.deepEqual([...s], [{ a: 1 }])
+
+  // but this ALSO does nothing, because the key is the same
+  s.add({ a: 1 })
+  t.deepEqual(log, expect)
+  t.deepEqual([...s], [{ a: 1 }])
+
   t.end()
 })

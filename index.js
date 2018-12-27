@@ -4,12 +4,13 @@ class KeyedSet extends EventEmitter {
   constructor (keystring = JSON.stringify) {
     super()
     this.map = new Map()
+    this.keystring = keystring
   }
 
   //
   // Mutating Methods
   //
-  
+
   add (item) {
     this.addKey(this.keystring(item), item)
   }
@@ -43,7 +44,6 @@ class KeyedSet extends EventEmitter {
   // Non-Mutating Methods
   //
 
-  
   has (value) {
     return this.hasKey(this.keystring(value))
   }
@@ -64,6 +64,8 @@ class KeyedSet extends EventEmitter {
     }
   }
 
+  // I know it feels a little weird to return the values of the map
+  // when asked for the keys, but we're pretending to be a set here.
   keys () {
     return this.map.values()
   }
