@@ -3,105 +3,77 @@ const EventEmitter = require('events')
 class KeyedSet extends EventEmitter {
   constructor (keystring = JSON.stringify) {
     super()
-    const map = new Map()
+    this.map = new Map()
+  }
 
-    this.add = (item) => {
-      const key = keystring(item)
-      const already = map.get(key)
-      if (!already) {
-        map.set(key, item)
-        this.emit('add-key', key)
-        this.emit('add', item)
-      }
+  //
+  // Mutating Methods
+  //
+  
+  add (item) {
+    this.addKey(this.keystring(item), item)
+  }
+  addKey (key, item) {
+    const already = this.map.get(key)
+    if (!already) {
+      this.map.set(key, item)
+      this.emit('add-key', key)
+      this.emit('add', item)
     }
+  }
 
-    this.delete = (arg) => {
-      let key
-      if (typeof arg === 'object') {
-        key = keystring(arg)
-      } else {
-        key = arg
-      }
-      const already = map.get(key)
-      if (already) {
-        map.delete(key)
-        this.emit('delete-key', key)
-        this.emit('delete', already)
-      }
+  delete (item) {
+    this.deleteKey(this.keystring(item))
+  }
+  deleteKey (key) {
+    const already = this.map.get(key)
+    if (already) {
+      this.map.delete(key)
+      this.emit('delete-key', key)
+      this.emit('delete', already)
     }
+  }
 
-    this.clear = () => {
-      map.clear()
-      this.emit('clear')
+  clear () {
+    this.map.clear()
+    this.emit('clear')
+  }
+
+  //
+  // Non-Mutating Methods
+  //
+
+  
+  has (value) {
+    return this.hasKey(this.keystring(value))
+  }
+  hasKey (key) {
+    return this.map.has(key)
+  }
+
+  * entries () {
+    for (const item of this.map.values()) {
+      yield [item, item]
     }
+  }
+  forEach (f, thisArg) {
+    if (thisArg) {
+      for (const item of this.map.values()) f.apply(thisArg, [item])
+    } else {
+      for (const item of this.map.values()) f(item)
+    }
+  }
 
-    //
-    // Non-mutating on obj
-    //
+  keys () {
+    return this.map.values()
+  }
 
-    Object.assign(this, {
-      has (value) {
-        const text = keystring(value)
-        return map.has(text)
-      },
-      * entries () {
-        for (const item of map.values()) {
-          yield [item, item]
-        }
-      },
-      forEach (f, thisArg) {
-        if (thisArg) {
-          for (const item of map.values()) f.apply(thisArg, [item])
-        } else {
-          for (const item of map.values()) f(item)
-        }
-      },
-      keys () {
-        return map.values()
-      },
-      values () {
-        return map.values()
-      },
-      * [Symbol.iterator] (value) {
-        for (const i of map.values()) yield i
-      }
-    })
+  values () {
+    return this.map.values()
+  }
 
-    //
-    // Non-mutating view of the keys
-    //
-
-    /* probably works, but not tested because I don't need it any more
-    const str = {}
-    Object.assign(str, {
-      has (value) {
-        return map.has(value)
-      },
-      * entries () {
-        for (const item of map.keys()) {
-          yield [item, item]
-        }
-      },
-      forEach (f, thisArg) {
-        if (thisArg) {
-          for (const item of map.keys()) f.apply(thisArg, [item])
-        } else {
-          for (const item of map.keys()) f(item)
-        }
-      },
-      keys () {
-        return map.keys()
-      },
-      values () {
-        return map.keys()
-      },
-      * [Symbol.iterator] (value) {
-        for (const i of map.keys()) yield i
-      }
-    })
-
-    this.strings = str
-    */
+  * [Symbol.iterator] (value) {
+    for (const i of this.map.values()) yield i
   }
 }
 
