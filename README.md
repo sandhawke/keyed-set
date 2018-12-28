@@ -115,19 +115,18 @@ implementations:
 ### SmartPatch
 
 The helper class KeyedSet.SmartPatch acts like an array of change
-events, but it "cancels" events that would have no effect when
+events, but it "cancels-out" events that would have no effect when
 combined. It can be used to record change events and then replay them
 more efficiently, especially in cases where there are rapid temporary
 changes which do not need to be propagated.
 
 ```js
 const KeyedSet = require('keyed-set')
-const SmartPatch = KeyedSet.SmartPatch
 
 const s = new KeyedSet()
 s.addAll([1,2,3])  // before listening
 
-const p = new SmartPatch(s)
+const p = s.smartPatch()
 s.on('change', change => { p.push(change) })
 
 s.addAll([4,5,6])

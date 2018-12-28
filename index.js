@@ -1,4 +1,5 @@
 const EventEmitter = require('events')
+const SmartPatch = require('./smart-patch')
 
 class KeyedSet extends EventEmitter {
   constructor (source, keyFunction) {
@@ -162,6 +163,10 @@ class KeyedSet extends EventEmitter {
     }
     return patch
   }
+
+  smartPatch () {
+    return new SmartPatch(this)
+  }
 }
 
 // just a list of change events; which is fine for this.diff()
@@ -185,4 +190,4 @@ class SimplePatch {
 }
 
 module.exports = KeyedSet
-module.exports.SmartPatch = require('./smart-patch')
+module.exports.SmartPatch = SmartPatch

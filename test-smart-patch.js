@@ -4,7 +4,7 @@ const test = require('tape')
 
 test('direct', t => {
   const s = new KeyedSet()
-  const p = new SmartPatch(s)
+  const p = s.smartPatch()
   // s.on('change', change => { p.push(change) })
 
   t.deepEqual([...p], [])
