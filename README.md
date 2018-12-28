@@ -120,7 +120,7 @@ combined. It can be used to record change events and then replay them
 more efficiently.
 
 ```js
-const KeyedSet = require('.')
+const KeyedSet = require('keyed-set')
 const SmartPatch = KeyedSet.SmartPatch
 
 const s = new KeyedSet()
