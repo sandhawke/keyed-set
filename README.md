@@ -100,18 +100,47 @@ implementations:
   element in KeyedSet setA but not in KeyedSet setB. Behavior is
   unspecified if setA and setB have different keyFunction.
 
-* setA.**diff**(setB) returns a patch, a sequence of events that would
+* setA.**diff**(setB) returns a patch, an iterable of events that would
   be needed to turn setA into setB.
 
 * set.**change**(event) applies the change described in the event to
   this set
 
-* setA.**changeAll**(patch) applies a list of changes.
+* setA.**changeAll**(patch) applies a sequence of changes.
   `setA.changeAll(setA.diff(setB))` would leave setA having the same
   members as setB.  (Of course, so would `setA.clear();
   setA.addAll(setB)`, but presumably there are times you want to
   minimize the changes.)
 
+### SmartPatch
+
+The helper class KeyedSet.SmartPatch acts like an array of change
+events, but it "cancels" events that would have no effect when
+combined. It can be used to record change events and then replay them
+more efficiently.
+
+```js
+const KeyedSet = require('.')
+const SmartPatch = KeyedSet.SmartPatch
+
+const s = new KeyedSet()
+s.addAll([1,2,3])  // before listening
+
+const p = new SmartPatch(s)
+s.on('change', change => { p.push(change) })
+
+s.addAll([4,5,6])
+p.length  // => 3
+s.delete(6)
+p.length  // => 2  It cancelled the add
+s.delete(1)
+s.delete(2) 
+p.length  // => 4  Need to remember these deletes
+s.add(1)
+p.length  // => 3  Well, only one of them
+s.clear()
+p.length  // => 1  No need to remember the adds at all
+```
 
 [npm-image]: https://img.shields.io/npm/v/keyed-set.svg?style=flat-square
 [npm-url]: https://npmjs.org/package/keyed-set

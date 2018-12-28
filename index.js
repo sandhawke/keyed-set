@@ -145,13 +145,13 @@ class KeyedSet extends EventEmitter {
   diff (newer) {
     if (newer.size === 0) {
       if (this.size === 0) {
-        return []
+        return new SimplePatch(this)
       } else {
-        return [{ type: 'clear' }]
+        return new SimplePatch(this, { type: 'clear' })
       }
     }
 
-    const patch = []
+    const patch = new SimplePatch(this)
     const ev = {}
     ev.add = newer.minus(this)
     ev.delete = this.minus(newer)
@@ -164,4 +164,25 @@ class KeyedSet extends EventEmitter {
   }
 }
 
+// just a list of change events; which is fine for this.diff()
+class SimplePatch {
+  constructor (base, ...values) {
+    this.base = base
+    this.list = [...values]
+  }
+  get length () {
+    return this.list.length
+  }
+  push (...evs) {
+    this.list.push(...evs)
+  }
+  shift () {
+    return this.list.shift()
+  }
+  [Symbol.iterator] () {
+    return this.list[Symbol.iterator]()
+  }
+}
+
 module.exports = KeyedSet
+module.exports.SmartPatch = require('./smart-patch')

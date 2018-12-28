@@ -254,18 +254,24 @@ test('diff + patch', t => {
   const c = new KeyedSet([   2,       5,    7]) //eslint-disable-line
   const d = new KeyedSet([])
 
-  t.deepEqual(b.diff(c), [
+  t.deepEqual([...b.diff(c)], [
     { type: 'delete', key: '1', item: 1 },
     { type: 'delete', key: '3', item: 3 },
     { type: 'delete', key: '6', item: 6 },
     { type: 'add', key: '2', item: 2 },
     { type: 'add', key: '7', item: 7 } ])
-  t.deepEqual(c.diff(d), [
+  t.deepEqual([...c.diff(d)], [
     { type: 'clear' } ])
-  t.deepEqual(d.diff(c), [
+  t.deepEqual([...d.diff(c)], [
     { type: 'add', key: '2', item: 2 },
     { type: 'add', key: '5', item: 5 },
     { type: 'add', key: '7', item: 7 } ])
+
+  const diff = d.diff(c) // DONT convert it to array, to test OUR shift
+  t.deepEqual(diff.shift(), { type: 'add', key: '2', item: 2 })
+  t.deepEqual(diff.shift(), { type: 'add', key: '5', item: 5 })
+  t.deepEqual(diff.shift(), { type: 'add', key: '7', item: 7 })
+  t.deepEqual(diff.shift(), undefined)
 
   function pair (x, y) {
     const diff = x.diff(y)
@@ -274,8 +280,9 @@ test('diff + patch', t => {
     // console.log('before:', [...copy])
     copy.changeAll(diff)
     // console.log('after:', [...copy])
-    t.deepEqual(y.diff(copy), [])
-    t.deepEqual(copy.diff(y), [])
+    t.equal(y.diff(copy).length, 0)
+    t.deepEqual([...y.diff(copy)], [])
+    t.deepEqual([...copy.diff(y)], [])
   }
   function xpair (x, y) {
     pair(x, y)
@@ -309,7 +316,7 @@ test('bad args', t => {
 test('clone', t => {
   const s1 = new KeyedSet([1, 2, 3])
   const s2 = s1.clone()
-  t.deepEqual(s1.diff(s2), [])
-  t.deepEqual(s2.diff(s1), [])
+  t.deepEqual([...s1.diff(s2)], [])
+  t.deepEqual([...s2.diff(s1)], [])
   t.end()
 })
