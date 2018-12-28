@@ -1,5 +1,5 @@
 # KeyedSet( )
-[![NPM version][npm-image]][npm-url]
+[![NPM version][npm-image]][npm-url] [![Coverage Status](https://coveralls.io/repos/github/sandhawke/keyed-set/badge.svg?branch=master)](https://coveralls.io/github/sandhawke/keyed-set?branch=master)
 
 Like Set() but with configurable equality, and it emits changes
 

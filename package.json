@@ -4,7 +4,8 @@
   "description": "Like Set() but with configurable equality, and it emits changes",
   "main": "index.js",
   "scripts": {
-    "test": "npx standard && npx tap --cov test*.js test/*.js"
+    "test": "npx standard && npx tap --cov test*.js test/*.js",
+    "coveralls": "export COVERALLS_REPO_TOKEN=$(cat ~/.coveralls-tokens/keyed-set); npx standard && npx tap --cov test*.js test/*.js"
   },
   "repository": {
     "type": "git",
