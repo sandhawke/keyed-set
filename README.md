@@ -22,26 +22,25 @@ This was created for [webdup](https://npmjs.org/package/webdup).
 A KeyedSet() is very similar to a Set(), except:
 
 * When you add(), it wont do anything if there's already an element in
-  the set with the same keystring value.
+  the set with the same key.
 
 * When you delete(), it looks for an element in the set with the same
-  keystring value (there can't be more than one), and removes that.
+  key (there can't be more than one), and removes that.
 
 * When the set changes, events are emited
 
-In general, it computes the keystring as needed for each item using a
-function you provide (or JSON.stringify by default).  If you happen to
-already have the keystring computed, you can pass it in, to save some
-work.  While we call it "keystring", the key is also allowed to be a
-number.
+In general, it computes the key as needed for each item using the
+keyFunction you provide (or JSON.stringify by default).  If you happen
+to already have the key computed, you can pass it in, to save some
+work. The key returned by keyFunction should be a string.
 
 Not surprisingly, the current implementation is a Map() where the key for a
-value is the keystring computed for that value, so you can also think
+value is what keyFunction returned for that value. So you can also think
 of a KeyedSet as a very constrained kind of map.
 
 ## Examples
 
-This uses the default keystring function, JSON.stringify:
+This uses the default keyFunction (JSON.stringify):
 
 ```js
 const KeyedSet = require('keyed-set')
@@ -78,22 +77,40 @@ s.deleteKey(1000)
 ## API
 
 The API for KeyedSet is the same as the standard JavaScript API for [Set](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set), except:
-* The KeyedSet constructor takes an optional additional parameter, the keystring function. This function takes an element of the set and returns a string or number to use as the equivalence key for that element.
+* The KeyedSet constructor takes an optional additional parameter, the keyFunction. This function takes an element of the set and returns a string to use as the equivalence key for that element.
 * It's an EventEmitter, with set.on/off/once, providing "change" events. The event objects passed to the event handler looks like one of these:
     * { type: 'add', key: ..., item: ... },
     * { type: 'delete', key: ..., item: ... },
     * { type: 'clear' }
+* set.clone() makes a copy with the same data and keyFunction; set.cloneEmpty() makes a copy with the same keyFunction but no data.
 
 For performance, if the caller already has the key computed, there are some additional methods:
 * set.addKey(key, value)
 * set.deleteKey(key)
 * set.hasKey(key)
 
-There are also some convenience functions, with reasonably efficient implementations:
-* setA.minus(setB) returns a new KeyedSet containing only those element in KeyedSet setA but not in KeyedSet setB. Behavior is unspecified if setA and setB have different keystring functions.
-* setA.diff(setB) returns a patch, a sequence of events that would be needed to turn setA into setB.
-* set.change(event) applies the change described in the event to this set
-* setA.changeAll(patch) applies a list of changes.  `setA.changeAll(setA.diff(setB))` would leave setA having the same members as setB.  (Of course, so would `setA.clear(); setA.addAll(setB)`, but presumably there are times you want to minimize the changes.)
+For performance, when a KeyedSet is doing an operation against another
+Set, if the other set has a .keyMap and a .keyFunction, they are read
+assuming they have the same semantics as in KeyedSet.
+
+There are also some convenience functions, with reasonably efficient
+implementations:
+
+* setA.**minus**(setB) returns a new KeyedSet containing only those
+  element in KeyedSet setA but not in KeyedSet setB. Behavior is
+  unspecified if setA and setB have different keyFunction.
+
+* setA.**diff**(setB) returns a patch, a sequence of events that would
+  be needed to turn setA into setB.
+
+* set.**change**(event) applies the change described in the event to
+  this set
+
+* setA.**changeAll**(patch) applies a list of changes.
+  `setA.changeAll(setA.diff(setB))` would leave setA having the same
+  members as setB.  (Of course, so would `setA.clear();
+  setA.addAll(setB)`, but presumably there are times you want to
+  minimize the changes.)
 
 
 [npm-image]: https://img.shields.io/npm/v/keyed-set.svg?style=flat-square

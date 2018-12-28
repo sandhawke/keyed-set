@@ -211,22 +211,22 @@ test('copy constructors', t => {
 
   // manually putting something into the map to make sure this
   // constructor uses the fast path
-  s3.map.set('fake', 100)
+  s3.keyMap.set('fake', 100)
   const s4 = new KeyedSet(s3)
-  t.equal(s4.map.get('fake'), 100)
+  t.equal(s4.keyMap.get('fake'), 100)
 
   // but this one does not, because the function is nominally different
   const s5 = new KeyedSet(s3, i => JSON.stringify(i))
-  t.notEqual(s5.map.get('fake'), 100)
+  t.notEqual(s5.keyMap.get('fake'), 100)
 
   // test the branch about map.size === 0
   const s6 = new KeyedSet([0])
   s6.addAll(s3)
-  t.deepEqual([...s6.map.entries()], [
+  t.deepEqual([...s6.keyMap.entries()], [
     // we still copied the raw map entries (which we corrupted for s3)
     [ '0', 0 ], [ '1', 1 ], [ '2', 2 ], [ '3', 3 ], [ 'fake', 100 ]
   ])
-  t.equal(s6.map.get('fake'), 100)
+  t.equal(s6.keyMap.get('fake'), 100)
   t.deepEqual([...s6], [0, 1, 2, 3, 100])
 
   t.end()
@@ -303,5 +303,13 @@ test('bad args', t => {
   } catch (e) {
     t.pass()
   }
+  t.end()
+})
+
+test('clone', t => {
+  const s1 = new KeyedSet([1, 2, 3])
+  const s2 = s1.clone()
+  t.deepEqual(s1.diff(s2), [])
+  t.deepEqual(s2.diff(s1), [])
   t.end()
 })
