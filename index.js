@@ -1,16 +1,40 @@
 const EventEmitter = require('events')
 
 class KeyedSet extends EventEmitter {
-  constructor (keystring = JSON.stringify) {
+  constructor (source, keystring) {
+    // console.log('incoming', {source, keystring})
+    if (typeof source === 'function') {
+      keystring = source
+      source = undefined
+    }
+    if (!keystring) keystring = JSON.stringify
+    // console.log('.. result', {source, keystring})
+
     super()
     this.map = new Map()
     this.keystring = keystring
+
+    if (source) {
+      this.addAll(source)
+    }
   }
 
   //
   // Mutating Methods
   //
 
+  addAll (source) {
+    // console.log('doing addAll %o', source)
+    if (source.map && source.keystring === this.keystring) {
+      if (this.map.size === 0) {
+        this.map = new Map(source.map)
+      } else {
+        for (const [k, v] of source.map.entries()) this.map.set(k, v)
+      }
+    } else {
+      for (const i of source) this.add(i)
+    }
+  }
   add (item) {
     this.addKey(this.keystring(item), item)
   }
@@ -76,6 +100,18 @@ class KeyedSet extends EventEmitter {
 
   * [Symbol.iterator] (value) {
     for (const i of this.map.values()) yield i
+  }
+
+  // We could also implement this by sorting both lists of keys, then
+  // running through them. That would give us a diff in sort-time plus
+  // linear time.  But I think hash lookup like this is probably fine.
+  minus (other) {
+    const result = new KeyedSet(this.keystring)
+    for (const [k, v] of this.map.entries()) {
+      if (other.hasKey(k)) continue
+      result.map.set(k, v)
+    }
+    return result
   }
 }
 

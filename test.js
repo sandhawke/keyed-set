@@ -220,3 +220,53 @@ test('key methods', t => {
 
   t.end()
 })
+
+test('copy constructors', t => {
+  const s1 = new KeyedSet([1, 2, 3])
+  t.deepEqual([...s1], [1, 2, 3])
+
+  const s2 = new KeyedSet(new Set([1, 2, 3]))
+  t.deepEqual([...s2], [1, 2, 3])
+
+  const s3 = new KeyedSet(s2)
+  t.deepEqual([...s3], [1, 2, 3])
+
+  // manually putting something into the map to make sure this
+  // constructor uses the fast path
+  s3.map.set('fake', 100)
+  const s4 = new KeyedSet(s3)
+  t.equal(s4.map.get('fake'), 100)
+
+  // but this one does not, because the function is nominally different
+  const s5 = new KeyedSet(s3, i => JSON.stringify(i))
+  t.notEqual(s5.map.get('fake'), 100)
+
+  // test the branch about map.size === 0
+  const s6 = new KeyedSet([0])
+  s6.addAll(s3)
+  t.deepEqual([...s6.map.entries()], [
+    // we still copied the raw map entries (which we corrupted for s3)
+    [ '0', 0 ], [ '1', 1 ], [ '2', 2 ], [ '3', 3 ], [ 'fake', 100 ]
+  ])
+  t.equal(s6.map.get('fake'), 100)
+  t.deepEqual([...s6], [0, 1, 2, 3, 100])
+
+
+  t.end()
+})
+
+test('minus', t => {
+  const a = new KeyedSet([1, 2, 3, 4, 5, 6, 7])
+  const b = new KeyedSet([1,    3,    5, 6   ]) //eslint-disable-line
+  const c = new KeyedSet([   2,       5,    7]) //eslint-disable-line
+  const d = new KeyedSet([])
+
+  t.deepEqual([...a.minus(b)], [2, 4, 7])
+  t.deepEqual([...a.minus(c)], [1, 3, 4, 6])
+  t.deepEqual([...a.minus(d)], [1, 2, 3, 4, 5, 6, 7])
+  t.deepEqual([...d.minus(a)], [])
+  t.deepEqual([...b.minus(c)], [1, 3, 6])
+  t.deepEqual([...c.minus(b)], [2, 7])
+
+  t.end()
+})
