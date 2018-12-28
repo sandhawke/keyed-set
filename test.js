@@ -251,7 +251,6 @@ test('copy constructors', t => {
   t.equal(s6.map.get('fake'), 100)
   t.deepEqual([...s6], [0, 1, 2, 3, 100])
 
-
   t.end()
 })
 
