@@ -47,10 +47,10 @@ This uses the default keystring function, JSON.stringify:
 const KeyedSet = require('keyed-set')
 
 const s = new KeyedSet()
-s.on('add', i => { console.log('add %o', i) })
+s.on('change', event => { console.log(event) })
 
 s.add({a: 1})
-// => add { a: 1 }
+// => { type: 'add', key: '{"a":1}', item: { a: 1 } }
 
 s.add({a: 1})
 // no output, an equivalent object was already in the set
@@ -62,29 +62,29 @@ This uses the "id" property of each object as its key:
 const KeyedSet = require('keyed-set')
 
 const s = new KeyedSet(item => item.id)
-s.on('add', i => { console.log('add %o', i) })
+s.on('change', event => { console.log(event) })
 
 s.add({a: 1, id: 1000})
-// => add { a: 1, id: 1000 }
+// => { type: 'add', key: 1000, item: { a: 1, id: 1000 } }
 
 s.add({b: 2, id: 1000})
-// no output, conceptually this object was already in set.  Obviously
-// this can get a little tricky.
+// no output, since an "equivalent" object was already in the set,
+// nothing gets added now
+
+s.deleteKey(1000)
+// => { type: 'delete', key: 1000, item: { a: 1, id: 1000 } }
 ```
 
 ## API
 
 The API for KeyedSet is the same as the standard JavaScript API for [Set](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set), except:
 * The KeyedSet constructor takes an optional additional parameter, the keystring function
-* set.addKey(key, value), set.deleteKey(key), and set.hasKey(key) are provided for increased performance if the caller already has the key computed.
-* set.on/off/once from EventEmitter, for these events:
-    * add
-    * add-key (if you want to be passed the key)
-    * delete
-    * delete-key (if you want to be passed the key)
-    * clear
-    * (todo) change, calls handler with {type, key, value}
-* setA.minus(setB) returns a new KeyedSet containing only those element in KeyedSet setA but not in KeyedSet setB.  Undefined if setA and setB have different keystring functions.
+* Additional methods: set.addKey(key, value), set.deleteKey(key), and set.hasKey(key) are provided for increased performance if the caller already has the key computed.
+* It's an EventEmitter, with set.on/off/once, providing "change" events. The argument to the event handler looks like one of these:
+    * { type: 'add', key: ..., item: ... },
+    * { type: 'delete', key: ..., item: ... },
+    * { type: 'clear' }
+* setA.minus(setB) returns a new KeyedSet containing only those element in KeyedSet setA but not in KeyedSet setB. Behavior is unspecified if setA and setB have different keystring functions.
 
 [npm-image]: https://img.shields.io/npm/v/keyed-set.svg?style=flat-square
 [npm-url]: https://npmjs.org/package/keyed-set

@@ -6,21 +6,15 @@ test('add', t => {
   const log = []
   let expect
 
-  s.on('add-key', i => { log.push(['add-key', i]) })
-  s.on('add-key', i => { log.push(['dup-add-key', i]) })
-  s.on('delete-key', i => { log.push(['delete-key', i]) })
-  s.on('add', i => { log.push(['add-object', i]) })
-  s.on('delete', i => { log.push(['delete-object', i]) })
-  s.on('clear', i => { log.push(['clear-object', i]) })
+  s.on('change', change => { log.push(change) })
 
   t.deepEqual(log, [])
   const item1 = { a: 1 }
   s.add(item1)
   expect = [
-    [ 'add-key', '{"a":1}' ],
-    [ 'dup-add-key', '{"a":1}' ],
-    [ 'add-object', { a: 1 } ]
+    { type: 'add', key: '{"a":1}', item: { a: 1 } }
   ]
+
   t.deepEqual(log, expect)
   t.deepEqual([...s], [{ a: 1 }])
 
@@ -41,19 +35,13 @@ test('delete', t => {
   const s = new KeyedSet()
   const log = []
   let expect
-
-  s.on('add-key', i => { log.push(['add-key', i]) })
-  s.on('delete-key', i => { log.push(['delete-key', i]) })
-  s.on('add', i => { log.push(['add-object', i]) })
-  s.on('delete', i => { log.push(['delete-object', i]) })
-  s.on('clear', i => { log.push(['clear-object', i]) })
+  s.on('change', change => { log.push(change) })
 
   t.deepEqual(log, [])
   const item1 = { a: 1 }
   s.add(item1)
   expect = [
-    [ 'add-key', '{"a":1}' ],
-    [ 'add-object', { a: 1 } ]
+    { type: 'add', key: '{"a":1}', item: { a: 1 } }
   ]
   t.deepEqual(log, expect)
   t.deepEqual([...s], [{ a: 1 }])
@@ -66,10 +54,8 @@ test('delete', t => {
   // present, removes it
   s.delete({ a: 1 })
   expect = [
-    [ 'add-key', '{"a":1}' ],
-    [ 'add-object', { a: 1 } ],
-    [ 'delete-key', '{"a":1}' ],
-    [ 'delete-object', { a: 1 } ]
+    { type: 'add', key: '{"a":1}', item: { a: 1 } },
+    { type: 'delete', key: '{"a":1}', item: { a: 1 } }
   ]
   t.deepEqual(log, expect)
   t.deepEqual([...s], [])
@@ -82,18 +68,13 @@ test('delete by key', t => {
   const log = []
   let expect
 
-  s.on('add-key', i => { log.push(['add-key', i]) })
-  s.on('delete-key', i => { log.push(['delete-key', i]) })
-  s.on('add', i => { log.push(['add-object', i]) })
-  s.on('delete', i => { log.push(['delete-object', i]) })
-  s.on('clear', i => { log.push(['clear-object', i]) })
+  s.on('change', change => { log.push(change) })
 
   t.deepEqual(log, [])
   const item1 = { a: 1 }
   s.add(item1)
   expect = [
-    [ 'add-key', '{"a":1}' ],
-    [ 'add-object', { a: 1 } ]
+    { type: 'add', key: '{"a":1}', item: { a: 1 } }
   ]
   t.deepEqual(log, expect)
   t.deepEqual([...s], [{ a: 1 }])
@@ -106,10 +87,8 @@ test('delete by key', t => {
   // present, removes it
   s.delete({ a: 1 })
   expect = [
-    [ 'add-key', '{"a":1}' ],
-    [ 'add-object', { a: 1 } ],
-    [ 'delete-key', '{"a":1}' ],
-    [ 'delete-object', { a: 1 } ]
+    { type: 'add', key: '{"a":1}', item: { a: 1 } },
+    { type: 'delete', key: '{"a":1}', item: { a: 1 } }
   ]
   t.deepEqual(log, expect)
   t.deepEqual([...s], [])
@@ -122,17 +101,15 @@ test('key', t => {
   const log = []
   let expect
 
-  s.on('add-key', i => { log.push(['add-key', i]) })
-  s.on('delete-key', i => { log.push(['delete-key', i]) })
-  s.on('add', i => { log.push(['add-object', i]) })
-  s.on('delete', i => { log.push(['delete-object', i]) })
-  s.on('clear', i => { log.push(['clear-object', i]) })
+  s.on('change', change => { log.push(change) })
 
   t.deepEqual(log, [])
   const item1 = { a: 1, id: 1000 }
   s.add(item1)
-  expect = [ [ 'add-key', 1000 ],
-    [ 'add-object', { a: 1, id: 1000 } ] ]
+  expect = [
+    { type: 'add', key: 1000, item: { a: 1, id: 1000 } }
+  ]
+
   t.deepEqual(log, expect)
   t.deepEqual([...s], [item1])
 
@@ -148,10 +125,19 @@ test('key', t => {
 
   // only cares about key
   s.delete({ id: 1000 })
-  expect = [ [ 'add-key', 1000 ],
-    [ 'add-object', { a: 1, id: 1000 } ],
-    [ 'delete-key', 1000 ],
-    [ 'delete-object', { a: 1, id: 1000 } ] ]
+  expect = [
+    { type: 'add', key: 1000, item: { a: 1, id: 1000 } },
+    { type: 'delete', key: 1000, item: { a: 1, id: 1000 } }
+  ]
+  t.deepEqual(log, expect)
+  t.deepEqual([...s], [])
+
+  s.clear()
+  expect = [
+    { type: 'add', key: 1000, item: { a: 1, id: 1000 } },
+    { type: 'delete', key: 1000, item: { a: 1, id: 1000 } },
+    { type: 'clear' }
+  ]
   t.deepEqual(log, expect)
   t.deepEqual([...s], [])
 
@@ -189,21 +175,13 @@ test('key methods', t => {
   const s = new KeyedSet()
   const log = []
   let expect
-
-  s.on('add-key', i => { log.push(['add-key', i]) })
-  s.on('add-key', i => { log.push(['dup-add-key', i]) })
-  s.on('delete-key', i => { log.push(['delete-key', i]) })
-  s.on('add', i => { log.push(['add-object', i]) })
-  s.on('delete', i => { log.push(['delete-object', i]) })
-  s.on('clear', i => { log.push(['clear-object', i]) })
+  s.on('change', change => { log.push(change) })
 
   t.deepEqual(log, [])
   const item1 = { a: 1 }
   s.addKey(JSON.stringify(item1), item1)
   expect = [
-    [ 'add-key', '{"a":1}' ],
-    [ 'dup-add-key', '{"a":1}' ],
-    [ 'add-object', { a: 1 } ]
+    { type: 'add', key: '{"a":1}', item: { a: 1 } }
   ]
   t.deepEqual(log, expect)
   t.deepEqual([...s], [{ a: 1 }])

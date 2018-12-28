@@ -42,8 +42,7 @@ class KeyedSet extends EventEmitter {
     const already = this.map.get(key)
     if (!already) {
       this.map.set(key, item)
-      this.emit('add-key', key)
-      this.emit('add', item)
+      this.emit('change', { type: 'add', key, item })
     }
   }
 
@@ -51,17 +50,16 @@ class KeyedSet extends EventEmitter {
     this.deleteKey(this.keystring(item))
   }
   deleteKey (key) {
-    const already = this.map.get(key)
-    if (already) {
+    const item = this.map.get(key)
+    if (item) {
       this.map.delete(key)
-      this.emit('delete-key', key)
-      this.emit('delete', already)
+      this.emit('change', { type: 'delete', key, item })
     }
   }
 
   clear () {
     this.map.clear()
-    this.emit('clear')
+    this.emit('change', { type: 'clear' })
   }
 
   //
