@@ -117,7 +117,8 @@ implementations:
 The helper class KeyedSet.SmartPatch acts like an array of change
 events, but it "cancels" events that would have no effect when
 combined. It can be used to record change events and then replay them
-more efficiently.
+more efficiently, especially in cases where there are rapid temporary
+changes which do not need to be propagated.
 
 ```js
 const KeyedSet = require('keyed-set')
@@ -141,6 +142,10 @@ p.length  // => 3  Well, only one of them
 s.clear()
 p.length  // => 1  No need to remember the adds at all
 ```
+
+Events can be de-queued in an appropriate order using p.shift().  New
+events can safely be added between calls to p.shift(), which returns
+`undefined` whenever there are no queued events.
 
 [npm-image]: https://img.shields.io/npm/v/keyed-set.svg?style=flat-square
 [npm-url]: https://npmjs.org/package/keyed-set

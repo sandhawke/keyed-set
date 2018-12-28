@@ -145,6 +145,19 @@ test('shift', t => {
   t.deepEqual(p.shift(), { type: 'clear' })
   t.deepEqual(p.shift(), undefined)
 
+  s.addAll([1, 2, 3])
+  t.deepEqual(p.shift(), { type: 'add', key: '1', item: 1 })
+  t.deepEqual(p.shift(), { type: 'add', key: '2', item: 2 })
+  s.addAll([4, 5])
+  t.deepEqual(p.shift(), { type: 'add', key: '3', item: 3 })
+  t.deepEqual(p.shift(), { type: 'add', key: '4', item: 4 })
+  s.clear()
+  t.deepEqual(p.shift(), { type: 'clear' })
+  s.addAll([3, 4])
+  t.deepEqual(p.shift(), { type: 'add', key: '3', item: 3 })
+  t.deepEqual(p.shift(), { type: 'add', key: '4', item: 4 })
+  t.deepEqual(p.shift(), undefined)
+
   t.end()
 })
 
