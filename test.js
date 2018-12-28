@@ -247,3 +247,61 @@ test('minus', t => {
 
   t.end()
 })
+
+test('diff + patch', t => {
+  const a = new KeyedSet([1, 2, 3, 4, 5, 6, 7])
+  const b = new KeyedSet([1,    3,    5, 6   ]) //eslint-disable-line
+  const c = new KeyedSet([   2,       5,    7]) //eslint-disable-line
+  const d = new KeyedSet([])
+
+  t.deepEqual(b.diff(c), [
+    { type: 'delete', key: '1', item: 1 },
+    { type: 'delete', key: '3', item: 3 },
+    { type: 'delete', key: '6', item: 6 },
+    { type: 'add', key: '2', item: 2 },
+    { type: 'add', key: '7', item: 7 } ])
+  t.deepEqual(c.diff(d), [
+    { type: 'clear' } ])
+  t.deepEqual(d.diff(c), [
+    { type: 'add', key: '2', item: 2 },
+    { type: 'add', key: '5', item: 5 },
+    { type: 'add', key: '7', item: 7 } ])
+
+  function pair (x, y) {
+    const diff = x.diff(y)
+    // console.log('diff:', diff)
+    const copy = new KeyedSet(x)
+    // console.log('before:', [...copy])
+    copy.changeAll(diff)
+    // console.log('after:', [...copy])
+    t.deepEqual(y.diff(copy), [])
+    t.deepEqual(copy.diff(y), [])
+  }
+  function xpair (x, y) {
+    pair(x, y)
+    pair(y, x)
+  }
+
+  xpair(a, a)
+  xpair(a, b)
+  xpair(a, c)
+  xpair(a, d)
+  xpair(b, b)
+  xpair(b, c)
+  xpair(b, d)
+  xpair(c, c)
+  xpair(c, d)
+
+  t.end()
+})
+
+test('bad args', t => {
+  const s1 = new KeyedSet([1, 2, 3])
+  try {
+    s1.change({ type: 'something-else' })
+    t.fail()
+  } catch (e) {
+    t.pass()
+  }
+  t.end()
+})

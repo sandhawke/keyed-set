@@ -78,13 +78,23 @@ s.deleteKey(1000)
 ## API
 
 The API for KeyedSet is the same as the standard JavaScript API for [Set](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set), except:
-* The KeyedSet constructor takes an optional additional parameter, the keystring function
-* Additional methods: set.addKey(key, value), set.deleteKey(key), and set.hasKey(key) are provided for increased performance if the caller already has the key computed.
-* It's an EventEmitter, with set.on/off/once, providing "change" events. The argument to the event handler looks like one of these:
+* The KeyedSet constructor takes an optional additional parameter, the keystring function. This function takes an element of the set and returns a string or number to use as the equivalence key for that element.
+* It's an EventEmitter, with set.on/off/once, providing "change" events. The event objects passed to the event handler looks like one of these:
     * { type: 'add', key: ..., item: ... },
     * { type: 'delete', key: ..., item: ... },
     * { type: 'clear' }
+
+For performance, if the caller already has the key computed, there are some additional methods:
+* set.addKey(key, value)
+* set.deleteKey(key)
+* set.hasKey(key)
+
+There are also some convenience functions, with reasonably efficient implementations:
 * setA.minus(setB) returns a new KeyedSet containing only those element in KeyedSet setA but not in KeyedSet setB. Behavior is unspecified if setA and setB have different keystring functions.
+* setA.diff(setB) returns a patch, a sequence of events that would be needed to turn setA into setB.
+* set.change(event) applies the change described in the event to this set
+* setA.changeAll(patch) applies a list of changes.  `setA.changeAll(setA.diff(setB))` would leave setA having the same members as setB.  (Of course, so would `setA.clear(); setA.addAll(setB)`, but presumably there are times you want to minimize the changes.)
+
 
 [npm-image]: https://img.shields.io/npm/v/keyed-set.svg?style=flat-square
 [npm-url]: https://npmjs.org/package/keyed-set

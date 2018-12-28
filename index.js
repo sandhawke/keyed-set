@@ -100,6 +100,24 @@ class KeyedSet extends EventEmitter {
     for (const i of this.map.values()) yield i
   }
 
+  //
+  // Our cool stuff
+  //
+
+  change (event) {
+    if (event.type === 'add') {
+      this.addKey(event.key, event.item)
+    } else if (event.type === 'delete') {
+      this.deleteKey(event.key)
+    } else if (event.type === 'clear') {
+      this.clear()
+    } else throw Error('bad event type: ' + JSON.stringify(event))
+  }
+
+  changeAll (events) {
+    for (const event of events) this.change(event)
+  }
+
   // We could also implement this by sorting both lists of keys, then
   // running through them. That would give us a diff in sort-time plus
   // linear time.  But I think hash lookup like this is probably fine.
@@ -110,6 +128,27 @@ class KeyedSet extends EventEmitter {
       result.map.set(k, v)
     }
     return result
+  }
+
+  diff (newer) {
+    if (newer.map.size === 0) {
+      if (this.map.size === 0) {
+        return []
+      } else {
+        return [{ type: 'clear' }]
+      }
+    }
+
+    const patch = []
+    const ev = {}
+    ev.add = newer.minus(this)
+    ev.delete = this.minus(newer)
+    for (const type of ['delete', 'add']) {
+      for (const [key, item] of ev[type].map.entries()) {
+        patch.push({ type, key, item })
+      }
+    }
+    return patch
   }
 }
 

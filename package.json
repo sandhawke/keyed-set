@@ -1,7 +1,7 @@
 {
   "name": "keyed-set",
   "version": "0.2.0",
-  "description": "Like Set() but with equality and emits change events",
+  "description": "Like Set() but with configurable equality, and it emits changes",
   "main": "index.js",
   "scripts": {
     "test": "npx standard && npx tap --cov test*.js test/*.js"
