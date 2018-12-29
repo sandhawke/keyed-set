@@ -126,8 +126,7 @@ const KeyedSet = require('keyed-set')
 const s = new KeyedSet()
 s.addAll([1,2,3])  // before listening
 
-const p = s.smartPatch()
-s.on('change', change => { p.push(change) })
+const p = s.mark() // creates a SmartPatch watching s
 
 s.addAll([4,5,6])
 p.length  // => 3
@@ -140,11 +139,14 @@ s.add(1)
 p.length  // => 3  Well, only one of them
 s.clear()
 p.length  // => 1  No need to remember the adds at all
+
+p.close() // stop watching s
 ```
 
-Events can be de-queued in an appropriate order using p.shift().  New
-events can safely be added between calls to p.shift(), which returns
-`undefined` whenever there are no queued events.
+Events can be de-queued using p.shift().  New events can safely be
+added between calls to p.shift(), which returns `undefined` whenever
+there are no queued events.  Event order is retained, although 
+theory it shouldn't matter.
 
 [npm-image]: https://img.shields.io/npm/v/keyed-set.svg?style=flat-square
 [npm-url]: https://npmjs.org/package/keyed-set
