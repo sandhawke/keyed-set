@@ -1,31 +1,29 @@
-// much more clever: matchin pairs of changes cancel out. If you add
-// something then delete it, or delete something then add it back,
-// both events go away.  Also, a clear event means we can forget all
-// changes so far.
+// New version, using one Map instead of two KeyedMaps. Simpler, and
+// also keeps the events in the same order, although that shouldn't
+// matter.
+
 class SmartPatch {
   constructor (base, ...values) {
     this.cleared = false
-    this.add = base.cloneEmpty()
-    this.delete = base.cloneEmpty()
+    this.todo = new Map() // key -> Event
     this.push(...values)
   }
   push (...evs) {
-    for (const { type, key, item } of evs) {
+    for (const event of evs) {
+      const { type, key } = event
       if (type === 'clear') {
         this.cleared = true
-        this.add.clear()
-        this.delete.clear()
-      } else if (type === 'add') {
-        if (this.delete.hasKey(key)) {
-          this.delete.deleteKey(key) // cancel the pair
+        this.todo.clear()
+      } else if (type === 'add' || type === 'delete') {
+        const previousSameKey = this.todo.get(key)
+        if (previousSameKey) {
+          if (previousSameKey.type === type) {
+            throw Error() // the Set should never generate this event
+          } else {
+            this.todo.delete(key) // cancel both the previous and this one
+          }
         } else {
-          this.add.addKey(key, item)
-        }
-      } else if (type === 'delete') {
-        if (this.add.hasKey(key)) {
-          this.add.deleteKey(key) // cancel the pair
-        } else {
-          this.delete.addKey(key, item)
+          this.todo.set(key, event)
         }
       } else {
         throw new Error('unknown event type ' + JSON.stringify(type))
@@ -37,27 +35,21 @@ class SmartPatch {
       this.cleared = false
       return { type: 'clear' }
     }
-    for (const type of ['delete', 'add']) {
-      const { value, done } = this[type].keyMap.entries().next()
-      if (!done) {
-        let [key, item] = value
-        // console.log('DELETING %o %o', {type, key}, [...this[type]])
-        this[type].deleteKey(key)
-        // console.log('     NOW %o %o', {type, key}, [...this[type]])
-        return { type, key, item }
-      }
+    const { value, done } = this.todo.entries().next()
+    if (!done) {
+      let [key, event] = value
+      this.todo.delete(key)
+      return event
     }
     return undefined
   }
   get length () {
-    return (this.cleared ? 1 : 0) + this.add.size + this.delete.size
+    return (this.cleared ? 1 : 0) + this.todo.size
   }
   * [Symbol.iterator] () {
     if (this.cleared) yield { type: 'clear' }
-    for (const type of ['delete', 'add']) {
-      for (const [key, item] of this[type].keyMap.entries()) {
-        yield { type, key, item }
-      }
+    for (const event of this.todo.values()) {
+      yield event
     }
   }
 }

@@ -1,4 +1,4 @@
-const KeyedSet = require('./index-sp1')
+const KeyedSet = require('.')
 const test = require('tape')
 const seedrandom = require('seedrandom')
 

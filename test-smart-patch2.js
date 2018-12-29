@@ -25,14 +25,17 @@ test('direct', t => {
   ])
   t.equal(p.length, 2)
 
-  /* actually, with smart-patch2, this isn't allowed
-  // adding it again does nothing
-  p.push({ type: 'add', key: '1', item: 1 })
+  // with smart-patch2, this isn't allowed
+  try {
+    p.push({ type: 'add', key: '1', item: 1 })
+    t.fail()
+  } catch (e) {
+    t.pass()
+  }
   t.deepEqual([...p], [
     { type: 'clear' },
     { type: 'add', key: '1', item: 1 }
   ])
-  */
 
   // deleting cancels
   p.push({ type: 'delete', key: '1', item: 1 })

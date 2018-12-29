@@ -1,5 +1,5 @@
 const EventEmitter = require('events')
-const SmartPatch = require('./smart-patch2')
+const SmartPatch = require('./smart-patch')
 
 class KeyedSet extends EventEmitter {
   constructor (source, keyFunction) {
