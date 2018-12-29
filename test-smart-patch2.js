@@ -1,4 +1,4 @@
-const KeyedSet = require('./index-sp1')
+const KeyedSet = require('.')
 const SmartPatch = KeyedSet.SmartPatch
 const test = require('tape')
 
@@ -25,12 +25,14 @@ test('direct', t => {
   ])
   t.equal(p.length, 2)
 
+  /* actually, with smart-patch2, this isn't allowed
   // adding it again does nothing
   p.push({ type: 'add', key: '1', item: 1 })
   t.deepEqual([...p], [
     { type: 'clear' },
     { type: 'add', key: '1', item: 1 }
   ])
+  */
 
   // deleting cancels
   p.push({ type: 'delete', key: '1', item: 1 })
@@ -86,9 +88,9 @@ test('listening', t => {
   s.delete(10)
 
   t.deepEqual([...p], [
-    { type: 'delete', key: '10', item: 10 },
     { type: 'add', key: '1', item: 1 },
-    { type: 'add', key: '3', item: 3 }
+    { type: 'add', key: '3', item: 3 },
+    { type: 'delete', key: '10', item: 10 }
   ])
   t.equal(p.length, 3)
 
@@ -126,19 +128,19 @@ test('shift', t => {
   s.delete(10)
 
   t.deepEqual([...p], [
-    { type: 'delete', key: '10', item: 10 },
     { type: 'add', key: '1', item: 1 },
     { type: 'add', key: '2', item: 2 },
-    { type: 'add', key: '3', item: 3 }
+    { type: 'add', key: '3', item: 3 },
+    { type: 'delete', key: '10', item: 10 }
   ])
   t.equal(p.length, 4)
 
-  t.deepEqual(p.shift(), { type: 'delete', key: '10', item: 10 })
   t.deepEqual(p.shift(), { type: 'add', key: '1', item: 1 })
   t.deepEqual(p.shift(), { type: 'add', key: '2', item: 2 })
+  t.deepEqual(p.shift(), { type: 'add', key: '3', item: 3 })
 
   t.deepEqual([...p], [
-    { type: 'add', key: '3', item: 3 }
+    { type: 'delete', key: '10', item: 10 }
   ])
 
   s.clear()

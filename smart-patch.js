@@ -41,7 +41,9 @@ class SmartPatch {
       const { value, done } = this[type].keyMap.entries().next()
       if (!done) {
         let [key, item] = value
+        // console.log('DELETING %o %o', {type, key}, [...this[type]])
         this[type].deleteKey(key)
+        // console.log('     NOW %o %o', {type, key}, [...this[type]])
         return { type, key, item }
       }
     }

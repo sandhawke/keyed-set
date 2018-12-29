@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/sandhawke/keyed-set#readme",
   "devDependencies": {
+    "seedrandom": "^2.4.4",
     "tape": "^4.9.1"
   }
 }
