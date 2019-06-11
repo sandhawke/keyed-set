@@ -320,3 +320,15 @@ test('clone', t => {
   t.deepEqual([...s2.diff(s1)], [])
   t.end()
 })
+
+test('get', t => {
+  const s = new KeyedSet(i => i.id)
+  const x = { id: 1000 }
+  const y = { id: 2000 }
+  s.add(x)
+  t.equal(x, s.get(1000))
+  t.equal(undefined, s.get(2000))
+  s.add(y)
+  t.equal(y, s.get(2000))
+  t.end()
+})

@@ -75,6 +75,9 @@ class KeyedSet extends EventEmitter {
   hasKey (key) {
     return this.keyMap.has(key)
   }
+  get (key) {
+    return this.keyMap.get(key)
+  }
 
   * entries () {
     for (const item of this.keyMap.values()) {
