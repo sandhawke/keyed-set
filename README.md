@@ -66,6 +66,9 @@ s.on('change', event => { console.log(event) })
 s.add({a: 1, id: 1000})
 // => { type: 'add', key: 1000, item: { a: 1, id: 1000 } }
 
+s.get(1000)
+// => { a: 1, id: 1000 }
+
 s.add({b: 2, id: 1000})
 // no output, since an "equivalent" object was already in the set,
 // nothing gets added now
@@ -88,6 +91,7 @@ For performance, if the caller already has the key computed, there are some addi
 * set.addKey(key, value)
 * set.deleteKey(key)
 * set.hasKey(key)
+* set.get(key) (here it's really acting as a map)
 
 For performance, when a KeyedSet is doing an operation against another
 Set, if the other set has a .keyMap and a .keyFunction, they are read
