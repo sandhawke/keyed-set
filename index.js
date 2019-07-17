@@ -48,7 +48,9 @@ class KeyedSet extends EventEmitter {
   }
 
   delete (item) {
-    this.deleteKey(this.keyFunction(item))
+    const key = this.keyFunction(item)
+    if (key === undefined) throw Error('delete of item without key, maybe you wanted KeyedSet.deleteKey()')
+    this.deleteKey(key)
   }
   deleteKey (key) {
     const item = this.keyMap.get(key)
