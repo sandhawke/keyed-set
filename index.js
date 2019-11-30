@@ -123,9 +123,17 @@ class KeyedSet extends EventEmitter {
 
   change (event) {
     if (event.type === 'add') {
-      this.addKey(event.key, event.item)
+      if (event.key === undefined) {
+        this.add(event.item)
+      } else {
+        this.addKey(event.key, event.item)
+      }
     } else if (event.type === 'delete') {
-      this.deleteKey(event.key)
+      if (event.key === undefined) {
+        this.delete(event.item)
+      } else {
+        this.deleteKey(event.key)
+      }
     } else if (event.type === 'clear') {
       this.clear()
     } else throw Error('bad event type: ' + JSON.stringify(event))

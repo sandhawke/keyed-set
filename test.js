@@ -119,9 +119,12 @@ test('key', t => {
   s.add({ a: 2, id: 1000 })
   t.deepEqual(log, expect)
 
-  // absent - does nothing
-  s.delete({ a: 2 })
-  t.deepEqual(log, expect)
+  // absent - raises error
+  try {
+    s.delete({ a: 2 })
+  } catch (e) {
+    t.pass()
+  }
 
   // only cares about key
   s.delete({ id: 1000 })
@@ -310,6 +313,21 @@ test('bad args', t => {
   } catch (e) {
     t.pass()
   }
+  t.end()
+})
+
+test('change without known key', t => {
+  const s = new KeyedSet(i => i.id)
+  let log = []; let expect
+  s.on('change', change => { log.push(change) })
+
+  s.change({ type: 'add', item: { id: 1 } })
+  s.change({ type: 'delete', item: { id: 1 } })
+  expect = [
+    { type: 'add', key: 1, item: { id: 1 } },
+    { type: 'delete', key: 1, item: { id: 1 } }
+  ]
+  t.deepEqual(log, expect)
   t.end()
 })
 
