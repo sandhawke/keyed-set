@@ -44,6 +44,7 @@ class KeyedSet extends EventEmitter {
     if (already === undefined) {
       this.keyMap.set(key, item)
       this.emit('change', { type: 'add', key, item })
+      this.emit('add-or-delete', { type: 'add', key, item })
     }
   }
 
@@ -57,11 +58,17 @@ class KeyedSet extends EventEmitter {
     if (item !== undefined) {
       this.keyMap.delete(key)
       this.emit('change', { type: 'delete', key, item })
+      this.emit('add-or-delete', { type: 'delete', key, item })
     }
   }
 
   clear () {
     this.keyMap.clear()
+    // for people who need to do something on each delete,
+    // they can subscribe to this version
+    for (const [key, item] of this.keyMap.entries()) {
+      this.emit('add-or-delete', { type: 'delete', key, item })
+    }
     this.emit('change', { type: 'clear' })
   }
 
@@ -160,12 +167,13 @@ class KeyedSet extends EventEmitter {
     return result
   }
 
-  diff (newer) {
+  diff (newer, options) {
+    const noClear = options && options.noClear
     if (newer.size === 0) {
       if (this.size === 0) {
         return new SimplePatch(this)
       } else {
-        return new SimplePatch(this, { type: 'clear' })
+        if (!noClear) return new SimplePatch(this, { type: 'clear' })
       }
     }
 
